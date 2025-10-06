@@ -1,0 +1,22 @@
+# Ignore everything at the root level
+/*
+!/package.json
+!/tsconfig.json
+!/dist/**
+!/src/**
+
+# Ignore specific files and directories
+.gitignore
+.env.example
+.eslintrc.js
+jest.config.js
+README.md
+DEPLOYMENT.md
+docker-compose.yml
+Dockerfile
+nginx.conf
+k8s/**
+scripts/**
+.github/**
+tests/**
+../**

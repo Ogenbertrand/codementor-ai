@@ -39,6 +39,9 @@ export const config = {
   // MCP Server Configuration
   mcpServerUrl: process.env.MCP_SERVER_URL || 'http://localhost:3001',
   
+  // GitHub Token for MCP Server communication
+  githubToken: process.env.GITHUB_TOKEN || '',
+  
   // Validate required configuration
   validate(): void {
     const requiredVars = [

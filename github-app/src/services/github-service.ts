@@ -24,13 +24,14 @@ export class GitHubService {
   ): Promise<GitHubPullRequest> {
     await this.rateLimiter.acquire();
     
-    const { data } = await withRetry(async () => {
+    const response = await (withRetry(async () => {
       return octokit.rest.pulls.get({
         owner,
         repo,
         pull_number: pullNumber
       });
-    });
+    }))();
+    const { data } = response;
 
     return data as GitHubPullRequest;
   }
@@ -46,13 +47,14 @@ export class GitHubService {
   ): Promise<FileDiff[]> {
     await this.rateLimiter.acquire();
     
-    const { data } = await withRetry(async () => {
+    const response = await (withRetry(async () => {
       return octokit.rest.pulls.listFiles({
         owner,
         repo,
         pull_number: pullNumber
       });
-    });
+    }))();
+    const { data } = response;
 
     return data as FileDiff[];
   }
@@ -70,14 +72,15 @@ export class GitHubService {
     await this.rateLimiter.acquire();
     
     try {
-      const { data } = await withRetry(async () => {
+      const response = await (withRetry(async () => {
         return octokit.rest.repos.getContent({
           owner,
           repo,
           path,
           ref
         });
-      });
+      }))();
+      const { data } = response;
 
       if ('content' in data) {
         return Buffer.from(data.content, 'base64').toString('utf8');
@@ -99,9 +102,9 @@ export class GitHubService {
     pullNumber: number,
     commitId: string,
     body: string,
+    octokit: Octokit,
     path?: string,
-    line?: number,
-    octokit: Octokit
+    line?: number
   ): Promise<void> {
     await this.rateLimiter.acquire();
     
@@ -118,9 +121,9 @@ export class GitHubService {
       commentData.line = line;
     }
 
-    await withRetry(async () => {
+    await (withRetry(async () => {
       return octokit.rest.pulls.createReviewComment(commentData);
-    });
+    }))();
 
     this.logger.info('Review comment created', { owner, repo, pullNumber, path, line });
   }
@@ -143,7 +146,7 @@ export class GitHubService {
   ): Promise<void> {
     await this.rateLimiter.acquire();
     
-    await withRetry(async () => {
+    await (withRetry(async () => {
       return octokit.rest.pulls.createReview({
         owner,
         repo,
@@ -153,7 +156,7 @@ export class GitHubService {
         comments,
         event: 'COMMENT'
       });
-    });
+    }))();
 
     this.logger.info('Review created', { 
       owner, 
@@ -175,14 +178,15 @@ export class GitHubService {
   ): Promise<any> {
     await this.rateLimiter.acquire();
     
-    const { data } = await withRetry(async () => {
+    const response = await (withRetry(async () => {
       return octokit.rest.git.getTree({
         owner,
         repo,
         tree_sha: treeSha,
         recursive: recursive ? '1' : undefined
       });
-    });
+    }))();
+    const { data } = response;
 
     return data;
   }
@@ -197,12 +201,13 @@ export class GitHubService {
   ): Promise<any> {
     await this.rateLimiter.acquire();
     
-    const { data } = await withRetry(async () => {
+    const response = await (withRetry(async () => {
       return octokit.rest.repos.get({
         owner,
         repo
       });
-    });
+    }))();
+    const { data } = response;
 
     return data;
   }
@@ -211,6 +216,6 @@ export class GitHubService {
    * Get Octokit instance for installation
    */
   async getInstallationOctokit(installationId: number): Promise<Octokit> {
-    return this.probot.auth(installationId) as Promise<Octokit>;
+    return this.probot.auth(installationId) as unknown as Promise<Octokit>;
   }
 }

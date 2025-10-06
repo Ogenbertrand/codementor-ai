@@ -3,7 +3,7 @@ import { Logger } from '../utils/logger';
 import { config } from '../config';
 
 export class CacheService {
-  private redis: Redis;
+  private redis?: Redis;
   private logger: Logger;
   private localCache: Map<string, { value: any; expires: number }>;
 
@@ -13,10 +13,9 @@ export class CacheService {
 
     if (config.redisUrl) {
       this.redis = new Redis(config.redisUrl, {
-        retryDelayOnFailover: 100,
         maxRetriesPerRequest: 3,
         lazyConnect: true
-      });
+      } as any);
 
       this.redis.on('connect', () => {
         this.logger.info('Connected to Redis');
@@ -142,10 +141,10 @@ export class CacheService {
       try {
         const info = await this.redis.info('memory');
         const memoryMatch = info.match(/used_memory_human:(\S+)/);
-        stats.redis.memory = memoryMatch ? memoryMatch[1] : 'unknown';
+        (stats.redis as any).memory = memoryMatch ? memoryMatch[1] : 'unknown';
         
         const keys = await this.redis.dbsize();
-        stats.redis.keys = keys;
+        (stats.redis as any).keys = keys;
       } catch (error) {
         this.logger.error('Error getting Redis stats', { error });
       }

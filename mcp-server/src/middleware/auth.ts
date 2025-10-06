@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { config } from '../config';
 import { Logger } from '../utils/logger';
 
@@ -74,8 +74,8 @@ export function authMiddleware(
 }
 
 export function generateToken(payload: any, expiresIn: string = '1h'): string {
-  return jwt.sign(payload, config.jwtSecret, { 
-    expiresIn,
+  return jwt.sign(payload, config.jwtSecret, {
+    expiresIn: expiresIn as any,
     issuer: 'codementor-ai-mcp',
     audience: 'codementor-ai-clients'
   });

@@ -250,9 +250,9 @@ export class CodeReviewService {
       pullNumber,
       commitId,
       this.formatReviewSummary(comments),
+      octokit,
       undefined,
-      undefined,
-      octokit
+      undefined
     );
 
     // Post individual comments for high and critical severity issues
@@ -265,9 +265,9 @@ export class CodeReviewService {
         pullNumber,
         commitId,
         this.formatIndividualComment(comment),
+        octokit,
         comment.filePath,
-        comment.lineNumber,
-        octokit
+        comment.lineNumber
       );
     }
 

@@ -17,8 +17,8 @@ export class MCPClient {
     private reconnectAttempts = 0;
     private maxReconnectAttempts = 5;
     private reconnectDelay = 5000;
-    private messageQueue: Array<{ resolve: Function; reject: Function; message: any }> = [];
-    private pendingRequests = new Map<string, { resolve: Function; reject: Function }>();
+    private messageQueue: Array<{ resolve: (value: any) => void; reject: (reason: any) => void; message: any }> = [];
+    private pendingRequests = new Map<string, { resolve: (value: any) => void; reject: (reason: any) => void }>();
     private isConnected = false;
 
     constructor(private configManager: ConfigurationManager) {
@@ -36,7 +36,7 @@ export class MCPClient {
             throw new Error('Server URL and API key must be configured');
         }
 
-        const wsUrl = serverUrl.replace(/^http/, 'ws') + '/mcp';
+        const wsUrl = (serverUrl as string).replace(/^http/, 'ws') + '/mcp';
         
         return new Promise((resolve, reject) => {
             try {
@@ -116,7 +116,7 @@ export class MCPClient {
                 },
                 {
                     headers: {
-                        'Authorization': apiKey,
+                        'Authorization': apiKey as string,
                         'Content-Type': 'application/json'
                     },
                     timeout: 10000
@@ -201,7 +201,7 @@ export class MCPClient {
         sort?: string,
         perPage?: number,
         page?: number
-    ): Promise<{ pullRequests: GitHubPullRequest[]; totalCount: number }> {
+    ): Promise<{ pullRequests: any[]; totalCount: number }> {
         const result = await this.sendRequest('list_pull_requests', {
             owner,
             repo,

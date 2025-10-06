@@ -146,16 +146,10 @@ export class AIAgent {
     fileContent: string,
     contextFiles?: string[]
   ): string {
-    let prompt = AI_PROMPTS.FIX_SUGGESTION;
-    
-    prompt = prompt.replace('{comment}', comment.description);
-    prompt = prompt.replace('{originalCode}', this.extractOriginalCode(fileContent, comment.lineNumber));
-    
-    if (contextFiles && contextFiles.length > 0) {
-      prompt = prompt.replace('{fileContext}', contextFiles.join('\n'));
-    } else {
-      prompt = prompt.replace('{fileContext}', fileContent);
-    }
+    const prompt = AI_PROMPTS.FIX_SUGGESTION
+      .replace(/\{comment\}/g, comment.description)
+      .replace(/\{originalCode\}/g, this.extractOriginalCode(fileContent, comment.lineNumber))
+      .replace(/\{fileContext\}/g, contextFiles && contextFiles.length > 0 ? contextFiles.join('\n') : fileContent);
 
     return prompt;
   }

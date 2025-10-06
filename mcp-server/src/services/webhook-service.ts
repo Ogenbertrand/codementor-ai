@@ -1,5 +1,5 @@
 import { Logger } from '../utils/logger';
-import { EventEmitter } from '@codementor-ai/shared';
+import { EventEmitter, WebSocketMessage } from '@codementor-ai/shared';
 import { MCPServer } from './mcp-server';
 
 export class WebhookService {
@@ -43,7 +43,7 @@ export class WebhookService {
     const { repository, pullRequest, commentCount } = payload;
 
     // Broadcast to all connected VS Code clients
-    const message = {
+    const message: WebSocketMessage = {
       type: 'notification',
       payload: {
         type: 'new_comments',
@@ -68,7 +68,7 @@ export class WebhookService {
     const { repository, pullRequest, reviewId, statistics } = payload;
 
     // Broadcast review completion to all connected clients
-    const message = {
+    const message: WebSocketMessage = {
       type: 'notification',
       payload: {
         type: 'review_complete',

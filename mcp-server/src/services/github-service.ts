@@ -30,25 +30,27 @@ export class GitHubService {
     await this.rateLimiter.acquire();
     
     try {
-      const { data } = await withRetry(async () => {
+      const response = await (withRetry(async () => {
         return this.octokit.rest.issues.listComments({
           owner,
           repo,
           issue_number: pullNumber
         });
-      });
+      }))();
+      const { data } = response;
 
       // Also get review comments
-      const { data: reviewComments } = await withRetry(async () => {
+      const reviewResponse = await (withRetry(async () => {
         return this.octokit.rest.pulls.listReviewComments({
           owner,
           repo,
           pull_number: pullNumber
         });
-      });
+      }))();
+      const { data: reviewComments } = reviewResponse;
 
       const allComments = [
-        ...data.map(comment => ({
+        ...data.map((comment: any) => ({
           id: comment.id,
           body: comment.body || '',
           path: null,
@@ -61,7 +63,7 @@ export class GitHubService {
           updated_at: comment.updated_at,
           pull_request_review_id: null
         })),
-        ...reviewComments.map(comment => ({
+        ...reviewComments.map((comment: any) => ({
           id: comment.id,
           body: comment.body || '',
           path: comment.path,
@@ -103,7 +105,7 @@ export class GitHubService {
 
       if (path && line && commitId) {
         // Create review comment on specific line
-        const { data } = await withRetry(async () => {
+        const response = await (withRetry(async () => {
           return this.octokit.rest.pulls.createReviewComment({
             owner,
             repo,
@@ -113,18 +115,20 @@ export class GitHubService {
             line,
             body
           });
-        });
+        }))();
+        const { data } = response;
         result = data;
       } else {
         // Create issue comment
-        const { data } = await withRetry(async () => {
+        const response = await (withRetry(async () => {
           return this.octokit.rest.issues.createComment({
             owner,
             repo,
             issue_number: pullNumber,
             body
           });
-        });
+        }))();
+        const { data } = response;
         result = data;
       }
 
@@ -147,13 +151,14 @@ export class GitHubService {
     await this.rateLimiter.acquire();
     
     try {
-      const { data } = await withRetry(async () => {
+      const response = await (withRetry(async () => {
         return this.octokit.rest.pulls.listFiles({
           owner,
           repo,
           pull_number: pullNumber
         });
-      });
+      }))();
+      const { data } = response;
 
       this.logger.info('Retrieved PR files', { owner, repo, pullNumber, count: data.length });
       return { files: data as FileDiff[] };
@@ -175,14 +180,15 @@ export class GitHubService {
     await this.rateLimiter.acquire();
     
     try {
-      const { data } = await withRetry(async () => {
+      const response = await (withRetry(async () => {
         return this.octokit.rest.repos.getContent({
           owner,
           repo,
           path,
           ref
         });
-      });
+      }))();
+      const { data } = response;
 
       if ('content' in data) {
         const content = Buffer.from(data.content, 'base64').toString('utf8');
@@ -215,26 +221,28 @@ export class GitHubService {
     try {
       // Try to update as issue comment first
       try {
-        const { data } = await withRetry(async () => {
+        const response = await (withRetry(async () => {
           return this.octokit.rest.issues.updateComment({
             owner,
             repo,
             comment_id: commentId,
             body
           });
-        });
+        }))();
+        const { data } = response;
         this.logger.info('Issue comment updated', { owner, repo, commentId });
         return { success: true, commentId: data.id };
       } catch {
         // If that fails, try as review comment
-        const { data } = await withRetry(async () => {
+        const response = await (withRetry(async () => {
           return this.octokit.rest.pulls.updateReviewComment({
             owner,
             repo,
             comment_id: commentId,
             body
           });
-        });
+        }))();
+        const { data } = response;
         this.logger.info('Review comment updated', { owner, repo, commentId });
         return { success: true, commentId: data.id };
       }
@@ -258,7 +266,7 @@ export class GitHubService {
     await this.rateLimiter.acquire();
     
     try {
-      const { data } = await withRetry(async () => {
+      const response = await (withRetry(async () => {
         return this.octokit.rest.pulls.list({
           owner,
           repo,
@@ -267,7 +275,8 @@ export class GitHubService {
           per_page: Math.min(perPage, 100),
           page
         });
-      });
+      }))();
+      const { data } = response;
 
       // Get total count from headers
       const totalCount = parseInt(data.headers?.['x-total-count'] || '0', 10) || data.data.length;

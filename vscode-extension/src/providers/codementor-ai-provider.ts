@@ -195,8 +195,8 @@ export class CodeMentorAIProvider {
                 repository.name,
                 prNumber,
                 resolutionBody,
-                'filePath' in comment ? comment.filePath : comment.path,
-                'filePath' in comment ? comment.lineNumber : comment.line,
+                'filePath' in comment ? comment.filePath : comment.path || undefined,
+                'filePath' in comment ? comment.lineNumber : (comment.line || undefined),
                 undefined
             );
 
@@ -245,10 +245,8 @@ export class CodeMentorAIProvider {
                 description: comment.body,
                 confidence: 1.0,
                 metadata: {
-                    githubCommentId: comment.id,
-                    author: comment.user.login,
-                    createdAt: comment.created_at,
-                    updatedAt: comment.updated_at
+                    rule: `github-comment-${comment.id}`,
+                    references: [`https://github.com/${repository.owner}/${repository.name}/pull/${prNumber}#discussion_r${comment.id}`]
                 }
             }));
 
@@ -306,9 +304,9 @@ export class CodeMentorAIProvider {
      * Start auto-refresh
      */
     private startAutoRefresh(): void {
-        const refreshInterval = this.configManager.get('refreshInterval');
+        const refreshInterval = this.configManager.get('refreshInterval') as number;
         
-        if (refreshInterval > 0) {
+        if (refreshInterval && refreshInterval > 0) {
             this.refreshInterval = setInterval(async () => {
                 if (this.mcpClient.isConnectionActive()) {
                     // Trigger refresh of comments

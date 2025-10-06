@@ -133,10 +133,8 @@ export class CommentTreeProvider implements vscode.TreeDataProvider<CommentTreeI
                 confidence,
                 suggestedCode,
                 metadata: {
-                    githubCommentId: comment.id,
-                    author: comment.user.login,
-                    createdAt: comment.created_at,
-                    updatedAt: comment.updated_at
+                    rule: `github-comment-${comment.id}`,
+                    references: [`https://github.com/user/repo/pull/1#discussion_r${comment.id}`]
                 }
             };
 
@@ -171,7 +169,7 @@ export class CommentTreeProvider implements vscode.TreeDataProvider<CommentTreeI
             return Promise.resolve(
                 this.comments
                     .filter(comment => comment.severity === element.severity)
-                    .map(comment => new CommentTreeItem(comment))
+                    .map(comment => new CommentItem(comment))
             );
         }
 
