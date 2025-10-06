@@ -1,0 +1,174 @@
+{
+  "name": "codementor-ai",
+  "displayName": "CodeMentor AI",
+  "description": "AI-powered code review assistant with GitHub integration",
+  "version": "1.0.0",
+  "publisher": "CodeMentorAI",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "code review",
+    "ai",
+    "github",
+    "pull request",
+    "assistant"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "codementor-ai.connect",
+        "title": "Connect to CodeMentor AI",
+        "category": "CodeMentor AI"
+      },
+      {
+        "command": "codementor-ai.refreshComments",
+        "title": "Refresh Comments",
+        "category": "CodeMentor AI",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "codementor-ai.showComment",
+        "title": "Show Comment",
+        "category": "CodeMentor AI"
+      },
+      {
+        "command": "codementor-ai.applyFix",
+        "title": "Apply Fix",
+        "category": "CodeMentor AI"
+      },
+      {
+        "command": "codementor-ai.resolveComment",
+        "title": "Resolve Comment",
+        "category": "CodeMentor AI"
+      },
+      {
+        "command": "codementor-ai.openSettings",
+        "title": "Open Settings",
+        "category": "CodeMentor AI"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "codementor-ai",
+          "name": "CodeMentor AI",
+          "when": "codementor-ai:connected"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "codementor-ai",
+          "title": "CodeMentor AI",
+          "icon": "$(comment-discussion)"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "codementor-ai.refreshComments",
+          "when": "view == codementor-ai",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "codementor-ai.showComment",
+          "when": "view == codementor-ai && viewItem == comment",
+          "group": "inline"
+        },
+        {
+          "command": "codementor-ai.applyFix",
+          "when": "view == codementor-ai && viewItem == comment",
+          "group": "inline@1"
+        },
+        {
+          "command": "codementor-ai.resolveComment",
+          "when": "view == codementor-ai && viewItem == comment",
+          "group": "inline@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "codementor-ai.connect"
+        },
+        {
+          "command": "codementor-ai.openSettings"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "CodeMentor AI",
+      "properties": {
+        "codementor-ai.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:3001",
+          "description": "MCP Server URL"
+        },
+        "codementor-ai.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API Key for MCP Server"
+        },
+        "codementor-ai.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically refresh comments"
+        },
+        "codementor-ai.refreshInterval": {
+          "type": "number",
+          "default": 30,
+          "description": "Refresh interval in seconds"
+        },
+        "codementor-ai.showNotifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show notifications for new comments"
+        },
+        "codementor-ai.gitHubToken": {
+          "type": "string",
+          "default": "",
+          "description": "GitHub Personal Access Token"
+        },
+        "codementor-ai.openaiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API Key for AI features"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "^20.10.5",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3",
+    "@vscode/vsce": "^2.22.0"
+  },
+  "dependencies": {
+    "@codementor-ai/shared": "file:../shared",
+    "ws": "^8.14.2",
+    "axios": "^1.6.2"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "@codementor-ai/github-app",
+  "version": "1.0.0",
+  "description": "GitHub App for CodeMentor AI code reviews",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@codementor-ai/shared": "file:../shared",
+    "probot": "^12.3.1",
+    "@octokit/rest": "^20.0.2",
+    "@octokit/webhooks": "^12.0.10",
+    "openai": "^4.24.1",
+    "winston": "^3.11.0",
+    "dotenv": "^16.3.1",
+    "ioredis": "^5.3.2",
+    "@pinecone-database/pinecone": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "typescript": "^5.3.3"
+  }
+}

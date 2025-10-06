@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-app
+  namespace: codementor-ai
+  labels:
+    app: github-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: github-app
+  template:
+    metadata:
+      labels:
+        app: github-app
+    spec:
+      containers:
+      - name: github-app
+        image: your-registry.com/codementor-ai:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        - name: GITHUB_APP_ID
+          valueFrom:
+            secretKeyRef:
+              name: codementor-secrets
+              key: github-app-id
+        - name: GITHUB_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: codementor-secrets
+              key: github-private-key
+        - name: GITHUB_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: codementor-secrets
+              key: github-webhook-secret
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: codementor-secrets
+              key: openai-api-key
+        - name: PINECONE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: codementor-secrets
+              key: pinecone-api-key
+              optional: true
+        - name: REDIS_URL
+          value: "redis://redis:6379"
+        - name: MCP_SERVER_URL
+          value: "http://mcp-server:3001"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: logs
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: github-app
+  namespace: codementor-ai
+  labels:
+    app: github-app
+spec:
+  selector:
+    app: github-app
+  ports:
+  - port: 80
+    targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: github-app-hpa
+  namespace: codementor-ai
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: github-app
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
